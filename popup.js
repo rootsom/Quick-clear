@@ -4,6 +4,42 @@ const rangeSelect = document.getElementById("range");
 const statusEl = document.getElementById("status");
 const statusText = document.getElementById("status-text");
 
+const siteFixBtn = document.getElementById("site-fix-btn");
+const siteDomainEl = document.getElementById("site-domain");
+const includeCookiesEl = document.getElementById("include-cookies");
+
+// Data cleared by "Fix this site". Cookies are deliberately left out by
+// default so a broken/stale page can be fixed without logging the user
+// out — cache and storage are almost always the actual culprit, not
+// the session cookie. The user can opt in to also clearing cookies.
+const SITE_DATA_TYPES_BASE = {
+  cache: true,
+  cacheStorage: true,
+  serviceWorkers: true,
+  indexedDB: true,
+  localStorage: true,
+};
+
+let currentOrigin = null;
+
+async function detectCurrentSite() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const url = new URL(tab.url);
+    if (!/^https?:$/.test(url.protocol)) {
+      throw new Error("not a web page");
+    }
+    currentOrigin = url.origin;
+    siteDomainEl.textContent = url.hostname;
+    siteFixBtn.disabled = false;
+  } catch {
+    currentOrigin = null;
+    siteDomainEl.textContent = "no site detected";
+    siteFixBtn.disabled = true;
+  }
+}
+detectCurrentSite();
+
 // Only these two data types are ever passed to the API.
 // Passwords are deliberately excluded. Site permission settings
 // (camera/location/notifications, etc.) aren't part of the
@@ -37,20 +73,50 @@ function timeLabel() {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-// Toolbar badge: a short-lived confirmation mark on the extension icon,
-// so you know it worked even if you clicked and moved on. Clears itself
-// after a few seconds, and always resets on popup open so it never gets
-// stuck showing a stale state.
-let badgeTimer;
-
+// Flashes a badge on the toolbar icon so the result is visible even
+// after the popup is closed. Clears itself after a few seconds.
+let badgeTimeout;
 function flashBadge(text, color) {
-  clearTimeout(badgeTimer);
+  clearTimeout(badgeTimeout);
   chrome.action.setBadgeText({ text });
   chrome.action.setBadgeBackgroundColor({ color });
-  badgeTimer = setTimeout(() => chrome.action.setBadgeText({ text: "" }), 4000);
+  badgeTimeout = setTimeout(() => {
+    chrome.action.setBadgeText({ text: "" });
+  }, 4000);
 }
 
-chrome.action.setBadgeText({ text: "" });
+siteFixBtn.addEventListener("click", async () => {
+  if (!currentOrigin) return;
+
+  siteFixBtn.disabled = true;
+  const originalLabel = siteFixBtn.textContent;
+  siteFixBtn.textContent = "Fixing…";
+  setStatus(`clearing ${new URL(currentOrigin).hostname}_`);
+
+  const dataToRemove = { ...SITE_DATA_TYPES_BASE };
+  if (includeCookiesEl.checked) {
+    dataToRemove.cookies = true;
+  }
+
+  try {
+    await chrome.browsingData.remove(
+      { since: 0, origins: [currentOrigin] },
+      dataToRemove
+    );
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab?.id) chrome.tabs.reload(tab.id);
+
+    const loggedOutNote = includeCookiesEl.checked ? " (cookies cleared)" : "";
+    setStatus(`done — ${new URL(currentOrigin).hostname} fixed at ${timeLabel()}${loggedOutNote}`);
+    flashBadge("✓", "#3ed6b5");
+  } catch (err) {
+    setStatus(`error — ${err?.message ?? "could not clear site data"}`, true);
+    flashBadge("!", "#e8935a");
+  } finally {
+    siteFixBtn.disabled = false;
+    siteFixBtn.textContent = originalLabel;
+  }
+});
 
 btn.addEventListener("click", async () => {
   btn.disabled = true;
@@ -62,10 +128,10 @@ btn.addEventListener("click", async () => {
   try {
     await chrome.browsingData.remove({ since }, DATA_TYPES);
     setStatus(`done — cache & history cleared at ${timeLabel()}`);
-    flashBadge("✓", "#3ED6B5");
+    flashBadge("✓", "#3ed6b5");
   } catch (err) {
     setStatus(`error — ${err?.message ?? "could not clear data"}`, true);
-    flashBadge("!", "#E8935A");
+    flashBadge("!", "#e8935a");
   } finally {
     btn.disabled = false;
     btnLabel.textContent = "Clear now";
