@@ -7,16 +7,18 @@
 </head>
 <body>
   <main class="panel">
-    <header class="brand-row">
-      <img class="logo" src="icons/icon48.png" width="30" height="30" alt="" />
-      <div class="brand-text">
-        <span class="eyebrow">SECOPS · CLEANUP</span>
-        <span class="version">v1.1</span>
-      </div>
+    <header class="eyebrow-row">
+      <span class="eyebrow">SECOPS · CLEANUP</span>
+      <span class="version">v1.0</span>
     </header>
 
-    <h1 class="title">Quick Clear</h1>
-    <p class="subtitle">Cache &amp; history. Nothing else.</p>
+    <div class="brand-row">
+      <img class="logo" src="icons/icon48.png" alt="Quick Clear logo" width="28" height="28" />
+      <div>
+        <h1 class="title">Quick Clear</h1>
+        <p class="subtitle">Cache &amp; history. Nothing else.</p>
+      </div>
+    </div>
 
     <section class="ledger">
       <div class="ledger-group">
@@ -33,6 +35,20 @@
           <span class="chip chip-lock"><i class="lock"></i>Site settings</span>
         </div>
       </div>
+    </section>
+
+    <section class="site-fix" id="site-fix">
+      <div class="site-fix-row">
+        <div class="site-fix-info">
+          <span class="ledger-label">Just this site</span>
+          <span id="site-domain" class="site-domain">—</span>
+        </div>
+        <button id="site-fix-btn" class="site-fix-btn" disabled>Fix this site</button>
+      </div>
+      <label class="cookie-toggle-row">
+        <input type="checkbox" id="include-cookies" />
+        <span>Also clear cookies (will log you out of this site)</span>
+      </label>
     </section>
 
     <label class="range-row" for="range">
