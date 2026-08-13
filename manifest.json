@@ -4,7 +4,7 @@
   "short_name": "Quick Clear",
   "version": "2.0.0",
   "description": "Smart, local browser cleanup with site-specific clearing, troubleshooting mode, presets and privacy controls.",
-  "permissions": ["browsingData", "storage", "activeTab", "commands"],
+  "permissions": ["browsingData", "storage", "activeTab",],
   "background": {
     "service_worker": "background.js"
   },
