@@ -16,11 +16,15 @@ chrome.commands.onCommand.addListener(async (command) => {
     await clearBase('all');
     await chrome.action.setBadgeText({ text: '✓' });
     await chrome.action.setBadgeBackgroundColor({ color: '#3ed6b5' });
-    setTimeout(() => chrome.action.setBadgeText({ text: '' }), 3500);
+    chrome.alarms.create('clear-badge', { delayInMinutes: 3500 / 60000 });
   } catch {
     await chrome.action.setBadgeText({ text: '!' });
     await chrome.action.setBadgeBackgroundColor({ color: '#e8935a' });
   }
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'clear-badge') chrome.action.setBadgeText({ text: '' });
 });
 
 chrome.runtime.onStartup.addListener(async () => {
