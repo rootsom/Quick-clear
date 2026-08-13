@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Quick Clear</title>
+<link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main class="panel">
+    <header class="brand-row">
+      <img class="logo" src="icons/icon48.png" width="30" height="30" alt="" />
+      <div class="brand-text">
+        <span class="eyebrow">SECOPS · CLEANUP</span>
+        <span class="version">v1.1</span>
+      </div>
+    </header>
+
+    <h1 class="title">Quick Clear</h1>
+    <p class="subtitle">Cache &amp; history. Nothing else.</p>
+
+    <section class="ledger">
+      <div class="ledger-group">
+        <span class="ledger-label">Clears</span>
+        <div class="chip-row">
+          <span class="chip chip-clear"><i class="dot"></i>Cache</span>
+          <span class="chip chip-clear"><i class="dot"></i>History</span>
+        </div>
+      </div>
+      <div class="ledger-group">
+        <span class="ledger-label">Protected</span>
+        <div class="chip-row">
+          <span class="chip chip-lock"><i class="lock"></i>Passwords</span>
+          <span class="chip chip-lock"><i class="lock"></i>Site settings</span>
+        </div>
+      </div>
+    </section>
+
+    <label class="range-row" for="range">
+      <span>Range</span>
+      <select id="range">
+        <option value="all" selected>All time</option>
+        <option value="hour">Past hour</option>
+        <option value="day">Past 24 hours</option>
+        <option value="week">Past 7 days</option>
+        <option value="month">Past 4 weeks</option>
+      </select>
+    </label>
+
+    <button id="clear-btn" class="clear-btn">
+      <span class="btn-label">Clear now</span>
+    </button>
+
+    <p id="status" class="status" aria-live="polite">
+      <span class="prompt">&gt;</span> <span id="status-text">awaiting action</span><span class="cursor">_</span>
+    </p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
