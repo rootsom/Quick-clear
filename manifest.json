@@ -1,10 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Quick Clear — Cache & History",
+  "name": "Quick Clear — Smart Browser Cleanup",
   "short_name": "Quick Clear",
-  "version": "1.1.0",
-  "description": "One click clears cache and browsing history. Passwords and site settings are never touched.",
-  "permissions": ["browsingData"],
+  "version": "2.0.0",
+  "description": "Smart, local browser cleanup with site-specific clearing, troubleshooting mode, presets and privacy controls.",
+  "permissions": ["browsingData", "storage", "activeTab", "commands"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "Quick Clear",
@@ -13,6 +16,15 @@
       "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
+    }
+  },
+  "commands": {
+    "quick-clear": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Quick Clear: clear cache and history"
     }
   },
   "icons": {

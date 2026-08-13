@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Quick Clear</title>
 <link rel="stylesheet" href="popup.css" />
 </head>
@@ -9,66 +10,110 @@
   <main class="panel">
     <header class="eyebrow-row">
       <span class="eyebrow">SECOPS · CLEANUP</span>
-      <span class="version">v1.0</span>
+      <span class="version">v2.0</span>
     </header>
 
     <div class="brand-row">
       <img class="logo" src="icons/icon48.png" alt="Quick Clear logo" width="28" height="28" />
       <div>
         <h1 class="title">Quick Clear</h1>
-        <p class="subtitle">Cache &amp; history. Nothing else.</p>
+        <p class="subtitle">Smart cleanup. Nothing touches passwords.</p>
       </div>
     </div>
 
-    <section class="ledger">
-      <div class="ledger-group">
-        <span class="ledger-label">Clears</span>
-        <div class="chip-row">
-          <span class="chip chip-clear"><i class="dot"></i>Cache</span>
-          <span class="chip chip-clear"><i class="dot"></i>History</span>
-        </div>
-      </div>
-      <div class="ledger-group">
-        <span class="ledger-label">Protected</span>
-        <div class="chip-row">
-          <span class="chip chip-lock"><i class="lock"></i>Passwords</span>
-          <span class="chip chip-lock"><i class="lock"></i>Site settings</span>
-        </div>
-      </div>
-    </section>
+    <nav class="tabs" aria-label="Cleanup modes">
+      <button class="tab active" data-tab="quick">Quick</button>
+      <button class="tab" data-tab="site">This site</button>
+      <button class="tab" data-tab="dev">Troubleshoot</button>
+    </nav>
 
-    <section class="site-fix" id="site-fix">
-      <div class="site-fix-row">
-        <div class="site-fix-info">
-          <span class="ledger-label">Just this site</span>
-          <span id="site-domain" class="site-domain">—</span>
+    <section class="view active" id="quick-view">
+      <div class="mode-card">
+        <div>
+          <span class="mode-label">PRESET</span>
+          <strong id="preset-title">Standard cleanup</strong>
         </div>
-        <button id="site-fix-btn" class="site-fix-btn" disabled>Fix this site</button>
+        <select id="preset" aria-label="Cleanup preset">
+          <option value="quick">Quick</option>
+          <option value="standard" selected>Standard</option>
+          <option value="deep">Deep</option>
+          <option value="custom">Custom</option>
+        </select>
       </div>
-      <label class="cookie-toggle-row">
-        <input type="checkbox" id="include-cookies" />
-        <span>Also clear cookies (will log you out of this site)</span>
+
+      <div class="check-grid" id="custom-options">
+        <label><input type="checkbox" data-type="cache" checked /> Cache</label>
+        <label><input type="checkbox" data-type="cacheStorage" checked /> Cache Storage</label>
+        <label><input type="checkbox" data-type="history" checked /> History</label>
+        <label><input type="checkbox" data-type="indexedDB" /> IndexedDB</label>
+        <label><input type="checkbox" data-type="serviceWorkers" /> Service Workers</label>
+        <label><input type="checkbox" data-type="localStorage" /> Local/site storage</label>
+        <label><input type="checkbox" data-type="fileSystems" /> File systems</label>
+      </div>
+
+      <label class="range-row" for="range"><span>Range</span>
+        <select id="range">
+          <option value="all" selected>All time</option>
+          <option value="hour">Past hour</option>
+          <option value="day">Past 24 hours</option>
+          <option value="week">Past 7 days</option>
+          <option value="month">Past 4 weeks</option>
+        </select>
       </label>
+
+      <div class="preview" id="quick-preview"></div>
+      <button id="clear-btn" class="clear-btn"><span class="btn-label">Clear now</span></button>
     </section>
 
-    <label class="range-row" for="range">
-      <span>Range</span>
-      <select id="range">
-        <option value="all" selected>All time</option>
-        <option value="hour">Past hour</option>
-        <option value="day">Past 24 hours</option>
-        <option value="week">Past 7 days</option>
-        <option value="month">Past 4 weeks</option>
-      </select>
-    </label>
+    <section class="view" id="site-view">
+      <div class="site-head">
+        <span class="mode-label">CURRENT SITE</span>
+        <strong id="site-origin">Detecting…</strong>
+      </div>
+      <div class="check-grid site-options">
+        <label><input type="checkbox" data-site-type="cache" checked /> Cache</label>
+        <label><input type="checkbox" data-site-type="cacheStorage" checked /> Cache Storage</label>
+        <label><input type="checkbox" data-site-type="localStorage" checked /> Local/site storage</label>
+        <label><input type="checkbox" data-site-type="indexedDB" checked /> IndexedDB</label>
+        <label><input type="checkbox" data-site-type="serviceWorkers" checked /> Service Workers</label>
+        <label><input type="checkbox" data-site-type="fileSystems" /> File systems</label>
+        <label class="warning-option"><input type="checkbox" data-site-type="cookies" /> Cookies</label>
+      </div>
+      <p class="hint">Only the detected website is targeted. Cookies are off by default because they can sign you out.</p>
+      <button id="site-clear-btn" class="clear-btn secondary">Clear this site</button>
+    </section>
 
-    <button id="clear-btn" class="clear-btn">
-      <span class="btn-label">Clear now</span>
-    </button>
+    <section class="view" id="dev-view">
+      <div class="dev-card">
+        <span class="mode-label">DEVELOPER / TROUBLESHOOTING</span>
+        <strong id="dev-origin">Detecting…</strong>
+        <p>Reset common client-side state for the current site, then reload it.</p>
+      </div>
+      <div class="check-grid">
+        <label><input type="checkbox" data-dev-type="cache" checked /> Cache</label>
+        <label><input type="checkbox" data-dev-type="cacheStorage" checked /> Cache Storage</label>
+        <label><input type="checkbox" data-dev-type="localStorage" checked /> Local/site storage</label>
+        <label><input type="checkbox" data-dev-type="indexedDB" checked /> IndexedDB</label>
+        <label><input type="checkbox" data-dev-type="serviceWorkers" checked /> Service Workers</label>
+        <label><input type="checkbox" data-dev-type="fileSystems" /> File systems</label>
+        <label><input type="checkbox" data-dev-type="cookies" /> Cookies</label>
+      </div>
+      <button id="troubleshoot-btn" class="clear-btn">Clear &amp; reload</button>
+    </section>
 
-    <p id="status" class="status" aria-live="polite">
-      <span class="prompt">&gt;</span> <span id="status-text">awaiting action</span><span class="cursor">_</span>
-    </p>
+    <section class="dashboard">
+      <div class="dash-row"><span>Cleanup freshness</span><strong id="score">—</strong></div>
+      <div class="meter"><span id="meter-fill"></span></div>
+      <div class="dash-meta"><span id="last-clean">Last cleanup: never</span><button id="settings-btn" class="text-btn">Settings</button></div>
+    </section>
+
+    <section class="settings" id="settings">
+      <div class="settings-title">LOCAL SETTINGS</div>
+      <label class="toggle-row"><span>Clear on browser startup</span><input id="auto-startup" type="checkbox" /></label>
+      <p class="hint">Clears cache and Cache Storage on browser startup. History and cookies are not touched. No data or telemetry leaves this extension.</p>
+    </section>
+
+    <p id="status" class="status" aria-live="polite"><span class="prompt">&gt;</span> <span id="status-text">ready</span><span class="cursor">_</span></p>
   </main>
   <script src="popup.js"></script>
 </body>
